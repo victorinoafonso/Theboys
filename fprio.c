@@ -46,6 +46,9 @@ struct fprio_t *fprio_destroi(struct fprio_t *f)
 // Retorna 0 se não encontar e -1 se encontar
 int existe(struct fprio_t *f, void *item)
 {
+    if(!f)
+        return ERRO;
+        
     struct fpnodo_t *aux = f->prim;
 
     while (aux)

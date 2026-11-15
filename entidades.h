@@ -7,19 +7,71 @@
 
 
 //Tipo de dados heroi
-typedef struct heroi heroi_t;
+//Estrutura que implementa a entidade Heroi
+typedef struct heroi
+{
+    int id;
+    struct cjto_t *habilidades;
+    int estado;
+    int paciencia;
+    int velocidade;
+    int experiencia;
+    int base_atual;
+
+} heroi_t;
 
 //Tipo de dados base
-typedef struct base base_t;
+//Estrutura que implementa a entidades base
+typedef struct base
+{
+    int id;
+    int lotacao;
+    struct cjto_t *presentes;
+    int estado;
+    struct fila_t *espera;
+    local_t local;
+    
+} base_t;
 
 //Tipo de dados missao
-typedef struct missao missao_t;
+//Estrutura que implementa a entidade Missão
+typedef struct missao
+{
+    int id;
+    struct cjto_t *habilidades;
+    int perigo;
+    local_t local;
+
+} missao_t;
 
 //Tipo de dados invasao
-typedef struct invasao invasao_t;
+//Estrutura que implementa a entidade Invasão
+typedef struct invasao
+{
+    int id;
+    int local;
+    int pen_base;
+    int pen_heroi;
+    
+} invasao_t;
 
+// Estrutura que implementa a entidade Mundo
 //Tipo de dados mundo
-typedef struct mundo mundo_t;
+typedef struct mundo
+{
+    int nHerois;
+    heroi_t *herois;
+    int nBases;
+    base_t *bases;
+    int nMissoes;
+    missao_t *missoes;
+    int nInvasoes;
+    invasao_t *invasoes;
+    int nHabilidades;
+    int tamanho_mundo;
+    int relogio;
+
+} mundo_t;
 
 //Destroi o mundo virtual e libera  a memória
 //Retorna NULL

@@ -3,11 +3,10 @@
 
 // seus #includes vão aqui
 
-
 // minimize o uso de variáveis globais
 
 // programa principal
-/*int main ()
+int main ()
 {
 
   // executar o laço de simulação
@@ -15,5 +14,5 @@
   // destruir o mundo
 
   return (0) ;
-}*/
+}
 

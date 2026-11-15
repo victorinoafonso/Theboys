@@ -1,4 +1,5 @@
-//Arquivo que contém todos as constantes necessárias para o funcionamento do programa
+//Arquivo que contém todos as constantes 
+//E funções uteis para o funcionamento do programa
 
 #ifndef DEFINES
 #define DEFINES
@@ -14,13 +15,37 @@
 #define N_MISSOES 5256 //T_FIM_DO_MUNDO / 100
 #define N_INVASOES 525 //T_FIM_DO_MUNDO / 1000
 
-//Defines do heroi e base
+//Defines de estados
 #define ATIVO 1
 #define INATIVO 0
 #define MORTO -1
 
-//Outros defines
+//Defines de retorno
 #define ERRO -1
+#define SUCESSO 1
+
+//Defines de eventos
+#define CHEGA 1
+#define ESPERA 2
+#define DESISTE 3
+#define AVISA 4
+#define ENTRA 5
+#define SAI 6
+#define VIAJA 7
+#define MORRE 8
+#define MISSAO 9
+#define INVADE 10
+#define REC_HEROI 11
+#define REC_BASE 12
+#define FIM 13
+
+
+// Gerador de números aleatórios entre min e max
+// Retorna um número inteiro gerado aleatoriamente num intervalo(min, max)
+int aleat(int min, int max)
+{
+    return rand() % (max - min + 1) + min;
+}
 
 
 

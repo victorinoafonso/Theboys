@@ -9,17 +9,6 @@
 #include "fila.h"
 #include "defines.h"
 
-// Estrutura que implementa a entidade Heroi
-struct heroi
-{
-    int id;
-    struct cjto_t *habilidades;
-    int estado;
-    int paciencia;
-    int velocidade;
-    int experiencia;
-    int base_atual;
-};
 
 // Tipo de dados local
 // Representa as coordenadas internas de localização
@@ -30,57 +19,6 @@ typedef struct local
 
 } local_t;
 
-// Estrutura que implementa a entidades base
-struct base
-{
-    int id;
-    int lotacao;
-    struct cjto_t *presentes;
-    int estado;
-    struct fila_t *espera;
-    local_t local;
-};
-
-// Estrutura que implementa a entidade Missão
-struct missao
-{
-    int id;
-    struct cjto_t *habilidades;
-    int perigo;
-    local_t local;
-};
-
-// Estrutura que implementa a entidade Invasão
-struct invasao
-{
-    int id;
-    int local;
-    int pen_base;
-    int pen_heroi;
-};
-
-// Estrutura que implementa a entidade Mundo
-struct mundo
-{
-    int nHerois;
-    heroi_t *herois;
-    int nBases;
-    base_t *bases;
-    int nMissoes;
-    missao_t *missoes;
-    int nInvasoes;
-    invasao_t *invasoes;
-    int nHabilidades;
-    int tamanho_mundo;
-    int relogio;
-};
-
-// Gerador de números aleatórios entre min e max
-// Retorna um número inteiro gerado aleatoriamente num intervalo(min, max)
-int aleat(int min, int max)
-{
-    return rand() % (max - min + 1) + min;
-}
 
 //Libera a memória alocada para o vetor de herois apontado por heroi
 //Libera a memória alocada para conjunto de habilidades
