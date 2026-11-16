@@ -1,36 +1,35 @@
-//Arquivo que contém todos as constantes 
-//E funções uteis para o funcionamento do programa
+// Arquivo que contém todos as constantes
+// E funções uteis para o funcionamento do programa
 
 #ifndef DEFINES
 #define DEFINES
 
+#include "fprio.h"
 
-
-
-//Defines do mundo
+// Defines do mundo
 #define T_INICIO 0
 #define T_FIM_DO_MUNDO 525600 // 60 * 24 * 365 dias (1 ano)
 #define N_TAMANHO_MUNDO 20000
 #define N_HABILIDADES 10
-#define N_HEROIS 50 // N_HABILIDADES * 5
-#define N_BASES 10 //N_HEROIS / 5
-#define N_MISSOES 5256 //T_FIM_DO_MUNDO / 100
-#define N_INVASOES 52 //T_FIM_DO_MUNDO / 10000
+#define N_HEROIS 50    // N_HABILIDADES * 5
+#define N_BASES 10     // N_HEROIS / 5
+#define N_MISSOES 5256 // T_FIM_DO_MUNDO / 100
+#define N_INVASOES 52  // T_FIM_DO_MUNDO / 10000
 
-//Defines de estados
+// Defines de estados
 #define ATIVO 1
 #define INATIVO 0
 #define MORTO -1
 
-//Defines de retorno
+// Defines de retorno
 #define ERRO -1
 #define SUCESSO 1
 
-//Defines booleanos
+// Defines booleanos
 #define TRUE 1
 #define FALSE 0
 
-//Defines de eventos
+// Defines de eventos
 #define CHEGA 1
 #define ESPERA 2
 #define DESISTE 3
@@ -45,7 +44,6 @@
 #define REC_BASE 12
 #define FIM 13
 
-
 // Gerador de números aleatórios entre min e max
 // Retorna um número inteiro gerado aleatoriamente num intervalo(min, max)
 static inline int aleat(int min, int max)
@@ -53,8 +51,20 @@ static inline int aleat(int min, int max)
     return rand() % (max - min + 1) + min;
 }
 
+//Muda todos os nós da fila de origem para destino
+static inline void fprio_troca(struct fprio_t *destino, struct fprio_t *origem)
+{
+    if (!destino || !origem)
+        return;
 
+    destino->prim = origem->prim;
+    destino->fim = origem->fim;
+    destino->num = origem->num;
 
-
+    // Zera a fila de origem
+    origem->prim = NULL;
+    origem->fim = NULL;
+    origem->num = 0;
+}
 
 #endif

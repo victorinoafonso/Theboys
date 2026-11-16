@@ -382,13 +382,20 @@ void evento_morre(struct fprio_t *lef, mundo_t *mundo, dados_t *item)
     if (!heroi || !missao)
         return;
 
-    base_t *base = &mundo->bases[heroi->base_atual];
+    // Aloca o evento AVISA
+    dados_t *novo_evento = malloc(sizeof(dados_t));
+    if (!novo_evento)
+        return;
 
     // Cria uma lef auxiliar
     struct fprio_t *aux = fprio_cria();
-
     if (!aux)
+    {
+        free(novo_evento);
         return;
+    }
+
+    base_t *base = &mundo->bases[heroi->base_atual];
 
     // Retira o herói da base
     cjto_retira(base->presentes, heroi->id);
@@ -396,12 +403,14 @@ void evento_morre(struct fprio_t *lef, mundo_t *mundo, dados_t *item)
     // Marca o herói como morto
     heroi->estado = MORTO;
 
-    // Remove os todos eventos futuros do herói da lef
+    // Remove todos os eventos futuros do herói da lef
     int tipo, tempo;
     dados_t *evento;
+
     while ((evento = fprio_retira(lef, &tipo, &tempo)))
     {
-        if (evento->dados1 == heroi)
+        // Compara os eventos relacionados ao heroi morto
+        if ((tipo == CHEGA || tipo == ESPERA || tipo == DESISTE || tipo == VIAJA || tipo == ENTRA || tipo == SAI || tipo == MORRE) && evento->dados1 == heroi)
         {
             free(evento);
         }
@@ -411,24 +420,17 @@ void evento_morre(struct fprio_t *lef, mundo_t *mundo, dados_t *item)
         }
     }
 
-    // Insere os eventos de volta na lef
-    while ((evento = fprio_retira(aux, &tipo, &tempo)))
-        fprio_insere(lef, evento, tipo, tempo);
-
+    // Faz a Lef receber os eventos futuros retirando
+    // as do heroi morto
+    fprio_troca(lef, aux);
     fprio_destroi(aux);
 
-    // Cria o evento AVISA
-    dados_t *novo = malloc(sizeof(dados_t));
+    novo_evento->dados1 = base;
+    novo_evento->dados2 = NULL; // Avisa só precisa da base
 
-    if (!novo)
-        return;
-
-    novo->dados1 = base;
-    novo->dados2 = NULL; // Avisa só precisa da bse
-
-    if (fprio_insere(lef, novo, AVISA, mundo->relogio) == ERRO)
+    if (fprio_insere(lef, novo_evento, AVISA, mundo->relogio) == ERRO)
     {
-        free(novo);
+        free(novo_evento);
         return;
     }
 
@@ -647,47 +649,27 @@ void evento_missao(struct fprio_t *lef, mundo_t *mundo, dados_t *item)
     }
 }
 
-// Evento querepresenta a invansao em uma base
-void evento_invade(struct fprio_t *lef, mundo_t *mundo, dados_t *item)
+// Remove da LEF todos os eventos SAI pendentes dos heróis presentes na base.
+// Retorna 1 em caso de sucesso ou ERRO (-1) se falhar a alocação/inserção.
+static int remove_saidas_base(struct fprio_t *lef, base_t *base)
 {
-    if (!lef || !mundo || !item)
-        return;
-
-    invasao_t *invasao = item->dados1;
-
-    if (!invasao)
-        return;
-
-    base_t *base = &mundo->bases[invasao->local];
-
-    printf("%6d: INVADE   BASE %d   INVADE %d\n", mundo->relogio, base->id, invasao->id);
-
-    // Se a base já está inativa, ignora a invasão
-    if (base->estado != ATIVO)
-        return;
-
-    // Remove os eventos SAI futuros dos heróis presentes
     struct fprio_t *aux = fprio_cria();
-
     if (!aux)
-        return;
+        return ERRO;
 
-    while (fprio_tamanho(lef) > 0)
+    int tipo, tempo;
+    dados_t *evento;
+
+    while ((evento = fprio_retira(lef, &tipo, &tempo)))
     {
-        int tipo, tempo;
-        dados_t *evento = fprio_retira(lef, &tipo, &tempo);
-
-        if (!evento)
-            break;
-
         int remover = 0;
 
-        if (tipo == SAI && tempo > mundo->relogio)
+        // Remove qualquer SAI pendente (inclusive no mesmo instante) dos heróis na base
+        if (tipo == SAI)
         {
             heroi_t *heroi = evento->dados1;
 
-            if (heroi &&
-                cjto_pertence(base->presentes, heroi->id) == 1)
+            if (heroi && cjto_pertence(base->presentes, heroi->id) == 1)
                 remover = 1;
         }
 
@@ -700,35 +682,25 @@ void evento_invade(struct fprio_t *lef, mundo_t *mundo, dados_t *item)
             if (fprio_insere(aux, evento, tipo, tempo) == ERRO)
             {
                 free(evento);
-                break;
+                fprio_troca(lef, aux);
+                fprio_destroi(aux);
+                return ERRO;
             }
         }
     }
 
-    // Devolve os eventos restantes à LEF
-    while (fprio_tamanho(aux) > 0)
-    {
-        int tipo, tempo;
-        dados_t *evento = fprio_retira(aux, &tipo, &tempo);
-
-        if (!evento)
-            break;
-
-        if (fprio_insere(lef, evento, tipo, tempo) == ERRO)
-        {
-            free(evento);
-            break;
-        }
-    }
-
+    // Devolve os eventos restantes à LEF em O(1)
+    fprio_troca(lef, aux);
     fprio_destroi(aux);
 
-    printf("%6d: INVADE %d BASE %d HEROIS INATIVOS [",
-           mundo->relogio, invasao->id, base->id);
+    return 1;
+}
 
+// Processa os heróis presentes na base
+static int processa_herois_base(struct fprio_t *lef, mundo_t *mundo, base_t *base, invasao_t *invasao)
+{
     int primeiro = 1;
 
-    // Processa os heróis presentes na base
     for (int i = 0; i < mundo->nHerois; i++)
     {
         heroi_t *heroi = &mundo->herois[i];
@@ -746,27 +718,23 @@ void evento_invade(struct fprio_t *lef, mundo_t *mundo, dados_t *item)
 
             // Agenda a recuperação do herói
             dados_t *recupera = malloc(sizeof(dados_t));
-
             if (!recupera)
-                return;
+                return ERRO;
 
             recupera->dados1 = heroi;
             recupera->dados2 = NULL;
 
-            int tempo = mundo->relogio +
-                        invasao->pen_heroi;
-
+            int tempo = mundo->relogio + invasao->pen_heroi;
             if (fprio_insere(lef, recupera, REC_HEROI, tempo) == ERRO)
             {
                 free(recupera);
-                return;
+                return ERRO;
             }
 
             // Agenda a saída imediata do herói
             dados_t *saida = malloc(sizeof(dados_t));
-
             if (!saida)
-                return;
+                return ERRO;
 
             saida->dados1 = heroi;
             saida->dados2 = base;
@@ -774,10 +742,41 @@ void evento_invade(struct fprio_t *lef, mundo_t *mundo, dados_t *item)
             if (fprio_insere(lef, saida, SAI, mundo->relogio) == ERRO)
             {
                 free(saida);
-                return;
+                return ERRO;
             }
         }
     }
+    return 1;
+}
+
+// Evento que representa a invasao em uma base
+void evento_invade(struct fprio_t *lef, mundo_t *mundo, dados_t *item)
+{
+    if (!lef || !mundo || !item)
+        return;
+
+    invasao_t *invasao = item->dados1;
+    if (!invasao)
+        return;
+
+    base_t *base = &mundo->bases[invasao->local];
+
+    printf("%6d: INVADE   BASE %d   INVADE %d\n", mundo->relogio, base->id, invasao->id);
+
+    // Se a base já está inativa, ignora a invasão
+    if (base->estado != ATIVO)
+        return;
+
+    // Remove os eventos SAI pendentes dos heróis presentes na base
+    if (remove_saidas_base(lef, base) == ERRO)
+        return;
+
+    printf("%6d: INVADE %d BASE %d HEROIS INATIVOS [",
+           mundo->relogio, invasao->id, base->id);
+
+    // Processa os heróis presentes na base
+    if (processa_herois_base(lef, mundo, base, invasao) == ERRO)
+        return;
 
     printf("]\n");
 
@@ -786,16 +785,14 @@ void evento_invade(struct fprio_t *lef, mundo_t *mundo, dados_t *item)
 
     // Agenda a reconstrução da base
     dados_t *reconstroi = malloc(sizeof(dados_t));
-
     if (!reconstroi)
         return;
 
     reconstroi->dados1 = base;
     reconstroi->dados2 = NULL;
 
-    int tempo = mundo->relogio + invasao->pen_base;
-
-    if (fprio_insere(lef, reconstroi, REC_BASE, tempo) == ERRO)
+    int tempo_base = mundo->relogio + invasao->pen_base;
+    if (fprio_insere(lef, reconstroi, REC_BASE, tempo_base) == ERRO)
     {
         free(reconstroi);
         return;
@@ -854,6 +851,7 @@ void evento_fim(mundo_t *mundo)
             mortos++;
 
         printf("HEROI %2d %s PAC %3d VEL %4d EXP %4d HABS [ ",
+
                heroi->id,
                heroi->estado == MORTO ? "MORTO" : "VIVO",
                heroi->paciencia,
@@ -871,11 +869,7 @@ void evento_fim(mundo_t *mundo)
     {
         base_t *base = &mundo->bases[i];
 
-        printf("BASE %2d LOT %2d FILA MAX %2d MISSOES %d\n",
-               base->id,
-               base->lotacao,
-               base->fila_max,
-               base->missoes_cumpridas);
+        printf("BASE %2d LOT %2d FILA MAX %2d MISSOES %d\n", base->id, base->lotacao, base->fila_max, base->missoes_cumpridas);
     }
 
     printf("\n");
@@ -884,7 +878,7 @@ void evento_fim(mundo_t *mundo)
     int cumpridas = 0;
     int min_tentativas = 0;
     int max_tentativas = 0;
-    long long total_tentativas = 0;
+    int total_tentativas = 0;
 
     for (int i = 0; i < mundo->nMissoes; i++)
     {
@@ -910,8 +904,7 @@ void evento_fim(mundo_t *mundo)
     if (mundo->nMissoes > 0)
     {
         taxa_missoes = 100.0 * cumpridas / mundo->nMissoes;
-        media_tentativas =
-            (double)total_tentativas / mundo->nMissoes;
+        media_tentativas = (double)total_tentativas / mundo->nMissoes;
     }
 
     if (mundo->nInvasoes > 0)

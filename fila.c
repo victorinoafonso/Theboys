@@ -64,42 +64,62 @@ static inline int existe(struct fila_t *f, void *item)
         aux = aux->prox;
     }
 
-    return 0;
+    return SUCESSO;
 }
 
-// Insere o item na fila
+// Cria e inicializa um novo nodo da fila
+static inline struct fila_nodo_t *cria_nodo(void *item)
+{
+    struct fila_nodo_t *novo = malloc(sizeof(struct fila_nodo_t));
+    if (!novo)
+        return NULL;
+
+    novo->item = item;
+    novo->prox = NULL;
+
+    return novo;
+}
+
+// Encaixa o novo nodo sempre no final da fila (FIFO)
+static void insere_final(struct fila_t *f, struct fila_nodo_t *novo)
+{
+    // Fila vazia
+    if (!f->prim) 
+    {
+        f->prim = novo;
+        f->fim = novo;
+    }
+
+    else 
+    {
+        f->fim->prox = novo;
+        f->fim = novo;
+    }
+}
+
+// Insere o item na fila.
 // Inserir duas vezes o mesmo item (o mesmo ponteiro) é um erro.
 // Retorno: número de itens na fila após a operação ou -1 se erro.
-int fila_insere (struct fila_t *f, void *item)
+int fila_insere(struct fila_t *f, void *item)
 {
-
-    if(!f || !item)
+    if (!f || !item)
         return ERRO;
 
-    struct fila_nodo_t *novo_elemento = malloc(sizeof(struct fila_nodo_t));
-
-    if(!novo_elemento)
+    // Verifica se já existe antes de alocar memória
+    if (existe(f, item) == ERRO)
         return ERRO;
 
-    novo_elemento->item = item;
-    novo_elemento->prox = NULL;
+    //Aloca o novo nodo
+    struct fila_nodo_t *novo_elemento = cria_nodo(item);
+    if (!novo_elemento)
+        return ERRO;
 
-    if(!f->prim)
-    {
-        f->prim = novo_elemento;
-        f->fim = novo_elemento;
-
-    }
-
-    else
-    {
-        f->fim->prox = novo_elemento;
-        f->fim = novo_elemento;
-    }
+    // Conecta no final da fila
+    insere_final(f, novo_elemento);
 
     return ++(f->num);
-    
 }
+
 
 // Retira o primeiro item da fila e o devolve
 // Retorno: ponteiro para o item retirado ou NULL se fila vazia ou erro.

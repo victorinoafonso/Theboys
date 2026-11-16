@@ -4,6 +4,7 @@
 // seus #includes vão aqui
 
 #include <stdlib.h>
+#include <stdio.h>
 #include "entidades.h"
 #include "simulacao.h"
 #include "fprio.h"
@@ -18,7 +19,23 @@ int main(void)
 
   mundo_t *mundo = inicia_mundo();
 
+  if (!mundo)
+  {
+    fprintf(stderr, "Erro ao criar o mundo\n");
+
+    return 1;
+  }
+
   struct fprio_t *lef = fprio_cria();
+
+  if (!lef)
+  {
+    fprintf(stderr, "Erro ao criar a LEF\n");
+
+    destroi_mundo(&mundo);
+    
+    return 1;
+  }
 
   eventos_iniciais(lef, mundo);
 
