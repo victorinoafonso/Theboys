@@ -6,6 +6,9 @@
 #ifndef SIMULACAO
 #define SIMULACAO
 
+#include "fprio.h"
+#include "entidades.h"
+
 
 //Tipo de dado dados dos eventos 
 // Guarda as informações para execução dos eventos da LEF

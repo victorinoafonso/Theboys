@@ -3,16 +3,30 @@
 
 // seus #includes vão aqui
 
+#include <stdlib.h>
+#include "entidades.h"
+#include "simulacao.h"
+#include "fprio.h"
+
 // minimize o uso de variáveis globais
 
 // programa principal
-int main ()
+
+int main(void)
 {
+  srand(0);
 
-  // executar o laço de simulação
+  mundo_t *mundo = inicia_mundo();
 
-  // destruir o mundo
+  struct fprio_t *lef = fprio_cria();
 
-  return (0) ;
+  eventos_iniciais(lef, mundo);
+
+  simulacao(lef, mundo);
+
+  destroi_simulacao(lef);
+
+  destroi_mundo(&mundo);
+
+  return 0;
 }
-

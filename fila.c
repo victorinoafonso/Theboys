@@ -49,7 +49,7 @@ struct fila_t *fila_destroi (struct fila_t *f)
 
 // Busca na fila se o item ja existe
 // Retorna 0 se não encontar e -1 se encontar
-int existe(struct fila_t *f, void *item)
+static inline int existe(struct fila_t *f, void *item)
 {
     if(!f)
         return ERRO;
@@ -73,7 +73,7 @@ int existe(struct fila_t *f, void *item)
 int fila_insere (struct fila_t *f, void *item)
 {
 
-    if(!f || !item || existe(f, item))
+    if(!f || !item)
         return ERRO;
 
     struct fila_nodo_t *novo_elemento = malloc(sizeof(struct fila_nodo_t));
@@ -97,7 +97,7 @@ int fila_insere (struct fila_t *f, void *item)
         f->fim = novo_elemento;
     }
 
-    return --(f->num);
+    return ++(f->num);
     
 }
 
@@ -142,14 +142,16 @@ void fila_imprime (struct fila_t *f)
 
     struct fila_nodo_t *aux = f->prim;
 
+    printf(" FILA [ ");
+
     while(aux)
     {
-        printf("%p", aux->item);
+        printf("%2d ", *(int *)aux->item);
 
         aux = aux->prox;
 
     }
 
-    printf("\n");
+    printf("]\n");
 
 }

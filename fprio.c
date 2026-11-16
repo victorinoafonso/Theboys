@@ -44,7 +44,7 @@ struct fprio_t *fprio_destroi(struct fprio_t *f)
 
 // Busca na fila se o item ja existe
 // Retorna 0 se não encontar e -1 se encontar
-int existe(struct fprio_t *f, void *item)
+static inline int existe(struct fprio_t *f, void *item)
 {
     if(!f)
         return ERRO;
@@ -117,7 +117,7 @@ int fprio_insere(struct fprio_t *f, void *item, int tipo, int prio)
 {
     // Verifica se os ponteiros são nulos ou se ja existe o item na fila
     // Retorna um erro
-    if (!f || !item || existe(f, item))
+    if (!f || !item)
         return ERRO;
 
     struct fpnodo_t *novo_elemento = malloc(sizeof(struct fpnodo_t));

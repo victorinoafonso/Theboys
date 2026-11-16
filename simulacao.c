@@ -8,6 +8,7 @@
 #include "fprio.h"
 #include "entidades.h"
 #include "defines.h"
+#include "eventos.h"
 
 // Insere na LEF os eventos iniciais da simulação
 // Retorna -1 se erro ou 1 se sucesso
@@ -121,69 +122,75 @@ void simulacao(struct fprio_t *lef, mundo_t *mundo)
             return;
 
         mundo->relogio = tempo;
+
+        mundo->eventos_tratados++;
         
 
         switch (evento)
         {
             case CHEGA:
-            
 
+                evento_chega(lef, mundo, item);
                 break;
 
             case ESPERA:
-
-
+            
+                evento_espera(lef, mundo, item);
                 break;
             
             case DESISTE:
 
+                evento_desiste(lef, mundo, item);
                 break;
 
             case AVISA:
-            
 
+                evento_avisa(lef, mundo, item);        
                 break;
 
             case ENTRA:
 
-
+                evento_entra(lef, mundo, item);
                 break;
             
             case SAI:
 
-
+                evento_sai(lef, mundo, item);
                 break;
 
             case VIAJA:
-            
 
+                evento_viaja(lef, mundo, item);       
                 break;
 
             case MORRE:
 
-
+                evento_morre(lef, mundo, item);
                 break;
             
             case MISSAO:
 
+                evento_missao(lef, mundo, item);
                 break;
             
             case INVADE:
-            
 
+                evento_invade(lef, mundo, item);          
                 break;
 
             case REC_HEROI:
 
-
+                evento_recupera_heroi( item);
                 break;
             
             case REC_BASE:
 
+                evento_reconstroi_base(item);
                 break;
 
             case FIM:
 
+                evento_fim(mundo);
                 break;
 
             default:
@@ -192,6 +199,7 @@ void simulacao(struct fprio_t *lef, mundo_t *mundo)
 
         }
 
+        
         free(item);
 
     } while (evento != FIM);

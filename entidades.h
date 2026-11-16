@@ -20,6 +20,15 @@ typedef struct heroi
 
 } heroi_t;
 
+// Tipo de dados local
+// Representa as coordenadas internas de localização
+typedef struct local
+{
+    int x;
+    int y;
+
+} local_t;
+
 //Tipo de dados base
 //Estrutura que implementa a entidades base
 typedef struct base
@@ -30,6 +39,8 @@ typedef struct base
     int estado;
     struct fila_t *espera;
     local_t local;
+    int fila_max;
+    int missoes_cumpridas;
     
 } base_t;
 
@@ -41,6 +52,8 @@ typedef struct missao
     struct cjto_t *habilidades;
     int perigo;
     local_t local;
+    int tentativas;
+    int cumprida;
 
 } missao_t;
 
@@ -70,6 +83,8 @@ typedef struct mundo
     int nHabilidades;
     int tamanho_mundo;
     int relogio;
+    int eventos_tratados;
+    int invasoes_realizadas;
 
 } mundo_t;
 

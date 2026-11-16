@@ -9,17 +9,6 @@
 #include "fila.h"
 #include "defines.h"
 
-
-// Tipo de dados local
-// Representa as coordenadas internas de localização
-typedef struct local
-{
-    int x;
-    int y;
-
-} local_t;
-
-
 //Libera a memória alocada para o vetor de herois apontado por heroi
 //Libera a memória alocada para conjunto de habilidades
 //Atribui NULL ao ponteiro
@@ -126,6 +115,8 @@ base_t *inicia_base(int nBases)
 
         base[i].local.x = aleat(0, N_TAMANHO_MUNDO - 1);
         base[i].local.y = aleat(0, N_TAMANHO_MUNDO - 1);
+        base[i].fila_max = 0;
+        base[i].missoes_cumpridas = 0;
     }
 
     return base;
@@ -180,6 +171,8 @@ missao_t *inicia_missao(int nMissoes)
         missao[i].perigo = aleat(0, 100);
         missao[i].local.x = aleat(0, N_TAMANHO_MUNDO - 1);
         missao[i].local.y = aleat(0, N_TAMANHO_MUNDO - 1);
+        missao[i].tentativas = 0;
+        missao[i].cumprida = 0;
     }
 
     return missao;
@@ -263,6 +256,8 @@ mundo_t *inicia_mundo()
     mundo->nHabilidades = N_HABILIDADES;
     mundo->tamanho_mundo = N_TAMANHO_MUNDO;
     mundo->relogio = T_INICIO;
+    mundo->eventos_tratados = 0;
+    mundo->invasoes_realizadas = 0;
 
     //Verificando se um dos ponteiros continua nulo
     //Se alguma alocaçaõ der errado, detroi o mundo e retorna NULL
