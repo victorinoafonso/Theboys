@@ -112,4 +112,6 @@ Ao final, são exibidas estatísticas como:
 
 ## Referência
 
+**Autor:** `Victorino Afonso`.
+
 Projeto Final — *The Boys*, disciplina CI1001 — Programação 1, Universidade Federal do Paraná (UFPR).
