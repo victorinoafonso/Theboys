@@ -15,7 +15,7 @@
 
 int main(void)
 {
-  srand(0);
+  srand(0); 
 
   mundo_t *mundo = inicia_mundo();
 

@@ -180,7 +180,7 @@ void simulacao(struct fprio_t *lef, mundo_t *mundo)
 
             case REC_HEROI:
 
-                evento_recupera_heroi( item);
+                evento_recupera_heroi(item);
                 break;
             
             case REC_BASE:
@@ -198,8 +198,7 @@ void simulacao(struct fprio_t *lef, mundo_t *mundo)
                 return;
 
         }
-
-        
+           
         free(item);
 
     } while (evento != FIM);
